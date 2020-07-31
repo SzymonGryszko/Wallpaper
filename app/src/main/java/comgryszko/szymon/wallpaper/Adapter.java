@@ -15,6 +15,8 @@ import java.util.List;
 
 public class Adapter extends PagerAdapter {
 
+    private final String CATEGORY = "CATEGORY";
+
     private List<Category> categories;
     private LayoutInflater layoutInflater;
     private Context context;
@@ -37,9 +39,9 @@ public class Adapter extends PagerAdapter {
 
     @NonNull
     @Override
-    public Object instantiateItem(@NonNull ViewGroup container, int position) {
+    public Object instantiateItem(@NonNull ViewGroup container, final int position) {
         layoutInflater = LayoutInflater.from(context);
-        View view = layoutInflater.inflate(R.layout.card_item, container, false);
+        final View view = layoutInflater.inflate(R.layout.card_item, container, false);
 
         ImageView imageView = view.findViewById(R.id.card_image_view);
         imageView.setImageResource(categories.get(position).getImage());
@@ -50,6 +52,7 @@ public class Adapter extends PagerAdapter {
             @Override
             public void onClick(View v) {
                 Intent intent =  new Intent(context, GridViewActivity.class);
+                intent.putExtra(CATEGORY, categories.get(position).getName());
                 context.startActivity(intent);
             }
         });
