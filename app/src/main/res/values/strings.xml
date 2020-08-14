@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Wallpaper</string>
+    <string name="photos_provided_by_pexels">Photos provided by <b>Pexels</b></string>
 </resources>

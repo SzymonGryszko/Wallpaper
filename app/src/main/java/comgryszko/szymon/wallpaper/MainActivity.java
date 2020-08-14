@@ -7,7 +7,9 @@ import androidx.viewpager.widget.ViewPager;
 import android.animation.ArgbEvaluator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.Animation;
@@ -27,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     Integer[] colors = null;
     ArgbEvaluator argbEvaluator = new ArgbEvaluator();
     private TextSwitcher textSwitcher;
+    private TextView poweredBy;
 
     @SuppressLint("SourceLockedOrientationActivity")
     @Override
@@ -36,15 +39,26 @@ public class MainActivity extends AppCompatActivity {
         setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         categories = new ArrayList<>();
-        categories.add(new Category(R.drawable.wallpaper, "Nature"));
-        categories.add(new Category(R.drawable.wallpaper, "Modern"));
-        categories.add(new Category(R.drawable.wallpaper, "Animal"));
-        categories.add(new Category(R.drawable.wallpaper, "Space"));
+        categories.add(new Category(R.drawable.nature, "Nature"));
+        categories.add(new Category(R.drawable.city, "City"));
+        categories.add(new Category(R.drawable.geometric, "Geometric"));
+        categories.add(new Category(R.drawable.space, "Space"));
 
         textSwitcher = findViewById(R.id.textSwitcher);
         textSwitcher.setCurrentText(categories.get(0).getName());
         textSwitcher.setInAnimation(this, android.R.anim.slide_in_left);
         textSwitcher.setOutAnimation(this, android.R.anim.fade_out);
+
+        poweredBy = findViewById(R.id.poweredby);
+        poweredBy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String url = "https://www.pexels.com/";
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(url));
+                startActivity(intent);
+            }
+        });
 
         adapter = new Adapter(categories, this);
         viewPager = findViewById(R.id.viewPager);
@@ -52,10 +66,10 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setPadding(150, 300, 130, 0);
 
         colors = new Integer[]{
-                ContextCompat.getColor(this, R.color.green),
+                ContextCompat.getColor(this, R.color.blue),
                 ContextCompat.getColor(this, R.color.dark_orange),
                 ContextCompat.getColor(this, R.color.yellow),
-                ContextCompat.getColor(this, R.color.blue)
+                ContextCompat.getColor(this, R.color.green)
         };
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -84,6 +98,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+
 
     }
 }

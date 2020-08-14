@@ -1,11 +1,15 @@
-package comgryszko.szymon.wallpaper;
+package comgryszko.szymon.wallpaper.network;
 
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import comgryszko.szymon.wallpaper.BuildConfig;
+import comgryszko.szymon.wallpaper.MyApplication;
 import okhttp3.Cache;
 import okhttp3.CacheControl;
 import okhttp3.Interceptor;
@@ -19,11 +23,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Service {
 
-    private static final String TAG = "ServiceGenerator";
-    private static final String BASE_URL = "https://jsonplaceholder.typicode.com";
+    private static final String TAG = "Service";
+    private static final String BASE_URL = "https://api.pexels.com/v1/";
     public static final String HEADER_CACHE_CONTROL = "Cache-Control";
     public static final String HEADER_PRAGMA = "Pragma";
-
+    private static final String PEXELS_KEY = "563492ad6f91700001000001d7306f12a80a469082cd7b15e69eaebd";
+    private Context ctx;
     private static Service instance;
 
     public static Service getInstance(){
@@ -33,7 +38,7 @@ public class Service {
         return instance;
     }
 
-    private static final long cacheSize = 5 * 1024 * 1024;
+    private static final long cacheSize = 10 * 1024 * 1024;
 
 
     private static Retrofit retrofit(){
@@ -47,20 +52,36 @@ public class Service {
     private static OkHttpClient okHttpClient(){
         return new OkHttpClient.Builder()
                 .cache(cache())
-                .addInterceptor(httpLoggingInterceptor()) // used if network off OR on
+                .addInterceptor(headerInterceptor())
+                .addInterceptor(loggingInterceptor())
                 .addNetworkInterceptor(networkInterceptor()) // only used when network is on
                 .addInterceptor(offlineInterceptor())
                 .build();
     }
 
     private static Cache cache(){
-        return new Cache(new File(MyApplication.getInstance().getCacheDir(),"someIdentifier"), cacheSize);
+        return new Cache(new File(MyApplication.getInstance().getCacheDir(),"Identifier"), cacheSize);
     }
 
-    /**
-     * This interceptor will be called both if the network is available and if the network is not available
-     * @return
-     */
+
+    private static Interceptor loggingInterceptor() {
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.level(HttpLoggingInterceptor.Level.BODY);
+        return interceptor;
+    }
+
+    private static Interceptor headerInterceptor(){
+        return new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request newRequest = chain.request().newBuilder()
+                        .addHeader("Authorization", PEXELS_KEY)
+                        .build();
+                return chain.proceed(newRequest);
+            }
+        };
+    }
+
     private static Interceptor offlineInterceptor() {
         return new Interceptor() {
             @Override
@@ -99,7 +120,7 @@ public class Service {
                 Response response = chain.proceed(chain.request());
 
                 CacheControl cacheControl = new CacheControl.Builder()
-                        .maxAge(5, TimeUnit.SECONDS)
+                        .maxAge(6, TimeUnit.HOURS)
                         .build();
 
                 return response.newBuilder()
@@ -109,21 +130,6 @@ public class Service {
                         .build();
             }
         };
-    }
-
-    private static HttpLoggingInterceptor httpLoggingInterceptor ()
-    {
-        HttpLoggingInterceptor httpLoggingInterceptor =
-                new HttpLoggingInterceptor( new HttpLoggingInterceptor.Logger()
-                {
-                    @Override
-                    public void log (String message)
-                    {
-                        Log.d(TAG, "log: http log: " + message);
-                    }
-                } );
-        httpLoggingInterceptor.setLevel( HttpLoggingInterceptor.Level.BODY);
-        return httpLoggingInterceptor;
     }
 
     public static API getApi(){

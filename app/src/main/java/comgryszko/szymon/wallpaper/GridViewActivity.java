@@ -1,22 +1,35 @@
 package comgryszko.szymon.wallpaper;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.GridView;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import comgryszko.szymon.wallpaper.models.Photo;
+import comgryszko.szymon.wallpaper.models.Root;
+import comgryszko.szymon.wallpaper.network.Service;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class GridViewActivity extends AppCompatActivity {
     private static final String TAG = "GridViewActivity";
 
     private static final String ADAPTER_STATE = "ADAPTER_STATE";
     private GridView gridView;
-    int position = 0;
+    static int index;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,16 +42,16 @@ public class GridViewActivity extends AppCompatActivity {
 
         switch (category) {
             case "Nature":
-                gridView.setAdapter(new PicassoAdapter(getApplicationContext(), getImageURLs1()));
+                APICall("nature");
                 break;
-            case "Modern":
-                gridView.setAdapter(new PicassoAdapter(getApplicationContext(), getImageURLs2()));
+            case "City":
+                APICall("city");
                 break;
-            case "Animal":
-                gridView.setAdapter(new PicassoAdapter(getApplicationContext(), getImageURLs1()));
+            case "Geometric":
+                APICall("geometric");
                 break;
             case "Space":
-                gridView.setAdapter(new PicassoAdapter(getApplicationContext(), getImageURLs2()));
+                APICall("space");
                 break;
         }
 
@@ -46,111 +59,44 @@ public class GridViewActivity extends AppCompatActivity {
         gridView.setVerticalScrollbarPosition(gridViewPosition);
     }
 
+    private void APICall(String category) {
+        Service.getApi().search(category,20,1)
+                .enqueue(new Callback<Root>() {
+                    @RequiresApi(api = Build.VERSION_CODES.N)
+                    @Override
+                    public void onResponse(Call<Root> call, Response<Root> response) {
+                        Root root = response.body();
+                        Log.d(TAG, "onResponse: "+ call.request());
+                        Log.d(TAG, "onResponse: " + response.body() + response.code());
+                        ArrayList<Photo> photos = new ArrayList<>(root.getPhotos());
+                        gridView.setAdapter(new PicassoAdapter(getApplicationContext(), photos));
+                    }
+
+                    @Override
+                    public void onFailure(Call<Root> call, Throwable t) {
+                        Log.d(TAG, "onFailure: "+ t.getMessage());
+                        Toast.makeText(GridViewActivity.this, "Network Fail", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putInt(ADAPTER_STATE, gridView.getFirstVisiblePosition());
+        Log.d(TAG, "onSaveInstanceState: "+ gridView.getFirstVisiblePosition());
         super.onSaveInstanceState(outState);
-        outState.putInt(ADAPTER_STATE, gridView.getLastVisiblePosition());
-        Log.d(TAG, "onSaveInstanceState: "+ gridView.getLastVisiblePosition());
     }
 
-    private ArrayList<String> getImageURLs1() {
-        ArrayList<String> imgURLs = new ArrayList<>();
-
-        imgURLs.add("https://i.redd.it/q3g5motlbe151.jpg");
-        imgURLs.add("https://i.redd.it/7j1q4oeczd151.jpg");
-        imgURLs.add("https://i.redd.it/q3g5motlbe151.jpg");
-        imgURLs.add("https://i.redd.it/7j1q4oeczd151.jpg");
-        imgURLs.add("https://i.redd.it/q3g5motlbe151.jpg");
-        imgURLs.add("https://i.redd.it/7j1q4oeczd151.jpg");
-        imgURLs.add("https://i.redd.it/q3g5motlbe151.jpg");
-        imgURLs.add("https://i.redd.it/7j1q4oeczd151.jpg");
-        imgURLs.add("https://i.redd.it/q3g5motlbe151.jpg");
-        imgURLs.add("https://i.redd.it/7j1q4oeczd151.jpg");
-        imgURLs.add("https://i.redd.it/q3g5motlbe151.jpg");
-        imgURLs.add("https://i.redd.it/7j1q4oeczd151.jpg");
-        imgURLs.add("https://i.redd.it/q3g5motlbe151.jpg");
-        imgURLs.add("https://i.redd.it/7j1q4oeczd151.jpg");
-        imgURLs.add("https://i.redd.it/q3g5motlbe151.jpg");
-        imgURLs.add("https://i.redd.it/7j1q4oeczd151.jpg");
-        imgURLs.add("https://i.redd.it/q3g5motlbe151.jpg");
-        imgURLs.add("https://i.redd.it/7j1q4oeczd151.jpg");
-        imgURLs.add("https://i.redd.it/q3g5motlbe151.jpg");
-        imgURLs.add("https://i.redd.it/7j1q4oeczd151.jpg");
-        imgURLs.add("https://i.redd.it/q3g5motlbe151.jpg");
-        imgURLs.add("https://i.redd.it/7j1q4oeczd151.jpg");
-
-
-        return imgURLs;
+    @Override
+    public void onResume(){
+        gridView.setSelection(index);
+        super.onResume();
     }
 
-    private ArrayList<String> getImageURLs2() {
-        ArrayList<String> imgURLs = new ArrayList<>();
-        imgURLs.add("https://i.redd.it/9bf67ygj710z.jpg");
-        imgURLs.add("https://c1.staticflickr.com/5/4276/34102458063_7be616b993_o.jpg");
-        imgURLs.add("https://i.redd.it/9bf67ygj710z.jpg");
-        imgURLs.add("https://c1.staticflickr.com/5/4276/34102458063_7be616b993_o.jpg");
-        imgURLs.add("https://i.redd.it/9bf67ygj710z.jpg");
-        imgURLs.add("https://c1.staticflickr.com/5/4276/34102458063_7be616b993_o.jpg");
-        imgURLs.add("https://i.redd.it/9bf67ygj710z.jpg");
-        imgURLs.add("https://c1.staticflickr.com/5/4276/34102458063_7be616b993_o.jpg");
-        imgURLs.add("https://i.redd.it/9bf67ygj710z.jpg");
-        imgURLs.add("https://c1.staticflickr.com/5/4276/34102458063_7be616b993_o.jpg");
-        imgURLs.add("https://i.redd.it/9bf67ygj710z.jpg");
-        imgURLs.add("https://c1.staticflickr.com/5/4276/34102458063_7be616b993_o.jpg");
-        imgURLs.add("https://i.redd.it/9bf67ygj710z.jpg");
-        imgURLs.add("https://c1.staticflickr.com/5/4276/34102458063_7be616b993_o.jpg");
-        imgURLs.add("https://i.redd.it/9bf67ygj710z.jpg");
-        imgURLs.add("https://c1.staticflickr.com/5/4276/34102458063_7be616b993_o.jpg");
-        imgURLs.add("https://i.redd.it/9bf67ygj710z.jpg");
-        imgURLs.add("https://c1.staticflickr.com/5/4276/34102458063_7be616b993_o.jpg");
-        imgURLs.add("https://i.redd.it/9bf67ygj710z.jpg");
-        imgURLs.add("https://c1.staticflickr.com/5/4276/34102458063_7be616b993_o.jpg");
-
-
-
-
-
-
-        return imgURLs;
+    @Override
+    public void onPause(){
+        index = gridView.getFirstVisiblePosition();
+        super.onPause();
     }
 
-//    private ArrayList<String> getImageURLs2() {
-//        ArrayList<String> imgURLs = new ArrayList<>();
-//        imgURLs.add("https://i.redd.it/9bf67ygj710z.jpg");
-//        imgURLs.add("https://c1.staticflickr.com/5/4276/34102458063_7be616b993_o.jpg");
-//        imgURLs.add("https://i.redd.it/q3g5motlbe151.jpg");
-//        imgURLs.add("https://i.redd.it/7j1q4oeczd151.jpg");
-//        imgURLs.add("https://i.redd.it/nenm7ud6fe151.jpg");
-//        imgURLs.add("https://i.redd.it/efji6i28fa151.jpg");
-//        imgURLs.add("https://i.redd.it/xq8forhj4e151.jpg");
-//        imgURLs.add("https://i.redd.it/4589j03uqe151.jpg");
-//        imgURLs.add("https://i.redd.it/9bf67ygj710z.jpg");
-//        imgURLs.add("https://c1.staticflickr.com/5/4276/34102458063_7be616b993_o.jpg");
-//        imgURLs.add("https://i.redd.it/q3g5motlbe151.jpg");
-//        imgURLs.add("https://i.redd.it/7j1q4oeczd151.jpg");
-//        imgURLs.add("https://i.redd.it/nenm7ud6fe151.jpg");
-//        imgURLs.add("https://i.redd.it/efji6i28fa151.jpg");
-//        imgURLs.add("https://i.redd.it/xq8forhj4e151.jpg");
-//        imgURLs.add("https://i.redd.it/4589j03uqe151.jpg");
-//        imgURLs.add("https://i.redd.it/9bf67ygj710z.jpg");
-//        imgURLs.add("https://c1.staticflickr.com/5/4276/34102458063_7be616b993_o.jpg");
-//        imgURLs.add("https://i.redd.it/q3g5motlbe151.jpg");
-//        imgURLs.add("https://i.redd.it/7j1q4oeczd151.jpg");
-//        imgURLs.add("https://i.redd.it/nenm7ud6fe151.jpg");
-//        imgURLs.add("https://i.redd.it/efji6i28fa151.jpg");
-//        imgURLs.add("https://i.redd.it/xq8forhj4e151.jpg");
-//        imgURLs.add("https://i.redd.it/4589j03uqe151.jpg");
-//        imgURLs.add("https://i.redd.it/9bf67ygj710z.jpg");
-//        imgURLs.add("https://c1.staticflickr.com/5/4276/34102458063_7be616b993_o.jpg");
-//        imgURLs.add("https://i.redd.it/q3g5motlbe151.jpg");
-//        imgURLs.add("https://i.redd.it/7j1q4oeczd151.jpg");
-//        imgURLs.add("https://i.redd.it/nenm7ud6fe151.jpg");
-//        imgURLs.add("https://i.redd.it/efji6i28fa151.jpg");
-//        imgURLs.add("https://i.redd.it/xq8forhj4e151.jpg");
-//        imgURLs.add("https://i.redd.it/4589j03uqe151.jpg");
-//        imgURLs.add("https://i.redd.it/4589j03uqe151.jpg");
-//
-//        return imgURLs;
-//    }
 }
