@@ -1,4 +1,4 @@
-package comgryszko.szymon.wallpaper;
+package comgryszko.szymon.wallpaper.utils;
 
 import android.app.Application;
 import android.content.Context;

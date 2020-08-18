@@ -1,5 +1,6 @@
-package comgryszko.szymon.wallpaper;
+package comgryszko.szymon.wallpaper.adapters;
 
+import android.app.DownloadManager;
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
@@ -9,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 
@@ -18,6 +20,9 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import comgryszko.szymon.wallpaper.R;
+import comgryszko.szymon.wallpaper.utils.DownloadFileFromURL;
+import comgryszko.szymon.wallpaper.utils.SquareImageView;
 import comgryszko.szymon.wallpaper.models.Photo;
 
 public class PicassoAdapter extends BaseAdapter {
@@ -34,7 +39,7 @@ public class PicassoAdapter extends BaseAdapter {
         inflater = LayoutInflater.from(context);
         this.context = context;
         this.photos = photos;
-        this.URLs = extractPictureURLs(photos);
+        this.URLs = extractPictureLargeURLs(photos);
         Log.d(TAG, "PicassoAdapter: " + this.photos.size());
     }
 
@@ -87,6 +92,15 @@ public class PicassoAdapter extends BaseAdapter {
             }
         });
 
+        view.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Log.d(TAG, "onLongClick: ");
+                //new DownloadFileFromURL().download(URLs.get(position), context);
+                return true;
+            }
+        });
+
         holder.author.setText(photos.get(position).photographer);
 
         return view;
@@ -99,7 +113,7 @@ public class PicassoAdapter extends BaseAdapter {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    private List<String> extractPictureURLs(ArrayList<Photo> photos) {
+    private List<String> extractPictureLargeURLs(ArrayList<Photo> photos) {
         List<String> URLs = new ArrayList<>();
         photos.forEach(photo -> URLs.add(photo.getSrc().large));
         return URLs;

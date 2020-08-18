@@ -1,4 +1,4 @@
-package comgryszko.szymon.wallpaper;
+package comgryszko.szymon.wallpaper.models;
 
 public class Category {
 

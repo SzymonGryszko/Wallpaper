@@ -46,9 +46,8 @@
         android:textColor="@color/white"
         android:text="@string/photos_provided_by_pexels"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
+        android:layout_centerHorizontal="true"
         android:layout_marginBottom="5dp"
-        android:layout_marginRight="10dp"
         android:textSize="12sp"/>
 
 

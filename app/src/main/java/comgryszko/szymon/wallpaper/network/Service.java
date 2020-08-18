@@ -1,15 +1,23 @@
 package comgryszko.szymon.wallpaper.network;
 
 import android.content.Context;
-import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
+import android.widget.GridView;
+import android.widget.Toast;
+
+import androidx.annotation.RequiresApi;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-import comgryszko.szymon.wallpaper.BuildConfig;
-import comgryszko.szymon.wallpaper.MyApplication;
+import comgryszko.szymon.wallpaper.CategoryActivity.CityCategoryActivity;
+import comgryszko.szymon.wallpaper.adapters.PicassoAdapter;
+import comgryszko.szymon.wallpaper.models.Photo;
+import comgryszko.szymon.wallpaper.models.Root;
+import comgryszko.szymon.wallpaper.utils.MyApplication;
 import okhttp3.Cache;
 import okhttp3.CacheControl;
 import okhttp3.Interceptor;
@@ -17,6 +25,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -134,5 +144,26 @@ public class Service {
 
     public static API getApi(){
         return retrofit().create(API.class);
+    }
+
+    public static void APICall(String category, GridView gridView, Context context) {
+        Service.getApi().search(category, 20, 1)
+                .enqueue(new Callback<Root>() {
+                    @RequiresApi(api = Build.VERSION_CODES.N)
+                    @Override
+                    public void onResponse(Call<Root> call, retrofit2.Response<Root> response) {
+                        Root root = response.body();
+                        Log.d(TAG, "onResponse: " + call.request());
+                        Log.d(TAG, "onResponse: " + response.body() + response.code());
+                        ArrayList<Photo> photos = new ArrayList<>(root.getPhotos());
+                        gridView.setAdapter(new PicassoAdapter(context.getApplicationContext(), photos));
+                    }
+
+                    @Override
+                    public void onFailure(Call<Root> call, Throwable t) {
+                        Log.d(TAG, "onFailure: " + t.getMessage());
+                        Toast.makeText(context, "Network Fail", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }

@@ -6,26 +6,25 @@ import androidx.viewpager.widget.ViewPager;
 
 import android.animation.ArgbEvaluator;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
-import android.widget.ViewSwitcher;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import comgryszko.szymon.wallpaper.adapters.MainActivityAdapter;
+import comgryszko.szymon.wallpaper.models.Category;
 
 public class MainActivity extends AppCompatActivity {
 
     private ViewPager viewPager;
     List<Category> categories;
-    Adapter adapter;
+    MainActivityAdapter adapter;
     Integer[] colors = null;
     ArgbEvaluator argbEvaluator = new ArgbEvaluator();
     private TextSwitcher textSwitcher;
@@ -60,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        adapter = new Adapter(categories, this);
+        adapter = new MainActivityAdapter(categories, this);
         viewPager = findViewById(R.id.viewPager);
         viewPager.setAdapter(adapter);
         viewPager.setPadding(150, 300, 130, 0);
