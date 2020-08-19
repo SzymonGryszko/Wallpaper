@@ -34,7 +34,7 @@ public class CityCategoryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grid_view);
         gridView = findViewById(R.id.grid_view);
-        Service.APICall("city", gridView, this);
+        Service.APICall(CityCategoryActivity.this, "city", gridView, this);
 
         int gridViewPosition = savedInstanceState == null ? 0 : savedInstanceState.getInt(ADAPTER_STATE);
         gridView.setVerticalScrollbarPosition(gridViewPosition);

@@ -1,7 +1,13 @@
 package comgryszko.szymon.wallpaper.adapters;
 
+import android.app.Activity;
 import android.app.DownloadManager;
+import android.app.WallpaperManager;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,12 +22,13 @@ import androidx.annotation.RequiresApi;
 
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import comgryszko.szymon.wallpaper.R;
-import comgryszko.szymon.wallpaper.utils.DownloadFileFromURL;
 import comgryszko.szymon.wallpaper.utils.SquareImageView;
 import comgryszko.szymon.wallpaper.models.Photo;
 
@@ -33,10 +40,12 @@ public class PicassoAdapter extends BaseAdapter {
     private LayoutInflater inflater;
     private ArrayList<Photo> photos;
     private List<String> URLs;
+    Activity activity;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public PicassoAdapter(Context context, ArrayList<Photo> photos) {
+    public PicassoAdapter(Activity activity, Context context, ArrayList<Photo> photos) {
         inflater = LayoutInflater.from(context);
+        this.activity = activity;
         this.context = context;
         this.photos = photos;
         this.URLs = extractPictureLargeURLs(photos);
@@ -96,7 +105,37 @@ public class PicassoAdapter extends BaseAdapter {
             @Override
             public boolean onLongClick(View v) {
                 Log.d(TAG, "onLongClick: ");
-                //new DownloadFileFromURL().download(URLs.get(position), context);
+//                Uri uri =   Uri.parse(URLs.get(position));
+//                Intent intent = new Intent(Intent.ACTION_ATTACH_DATA);
+//                intent.addCategory(Intent.CATEGORY_DEFAULT);
+//                intent.setDataAndType(uri, "image/*");
+//                intent.putExtra("mimeType", "image/*");
+//                activity.startActivity(Intent.createChooser(intent, "Set as:"));
+                Picasso.get().load(photos.get(position).getSrc().getPortrait()).into(new Target(){
+
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                        WallpaperManager wallpaperManager = WallpaperManager.getInstance(context);
+                        try {
+                            wallpaperManager.setBitmap(bitmap);
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                        Log.d("TAG", "onBitmapLoaded: ");
+                        Toast.makeText(context, "Wallpaper Changed", Toast.LENGTH_SHORT).show();
+                    }
+                    @Override
+                    public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                        Toast.makeText(context, "Loading image failed", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) {
+                        Toast.makeText(context, "Downloading image", Toast.LENGTH_SHORT).show();
+                    }
+
+
+                });
                 return true;
             }
         });

@@ -34,7 +34,7 @@ public class GeometricCategoryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grid_view);
         gridView = findViewById(R.id.grid_view);
-        Service.APICall("geometric", gridView, this);
+        Service.APICall(GeometricCategoryActivity.this, "geometric", gridView, this);
 
         int gridViewPosition = savedInstanceState == null ? 0 : savedInstanceState.getInt(ADAPTER_STATE);
         gridView.setVerticalScrollbarPosition(gridViewPosition);

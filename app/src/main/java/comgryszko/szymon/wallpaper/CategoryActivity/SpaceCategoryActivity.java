@@ -34,7 +34,7 @@ public class SpaceCategoryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grid_view);
         gridView = findViewById(R.id.grid_view);
-        Service.APICall("space", gridView, this);
+        Service.APICall(SpaceCategoryActivity.this, "space", gridView, this);
 
         int gridViewPosition = savedInstanceState == null ? 0 : savedInstanceState.getInt(ADAPTER_STATE);
         gridView.setVerticalScrollbarPosition(gridViewPosition);

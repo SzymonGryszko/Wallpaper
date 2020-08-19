@@ -1,5 +1,6 @@
 package comgryszko.szymon.wallpaper.network;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
@@ -146,7 +147,7 @@ public class Service {
         return retrofit().create(API.class);
     }
 
-    public static void APICall(String category, GridView gridView, Context context) {
+    public static void APICall(Activity activity, String category, GridView gridView, Context context) {
         Service.getApi().search(category, 20, 1)
                 .enqueue(new Callback<Root>() {
                     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -156,7 +157,7 @@ public class Service {
                         Log.d(TAG, "onResponse: " + call.request());
                         Log.d(TAG, "onResponse: " + response.body() + response.code());
                         ArrayList<Photo> photos = new ArrayList<>(root.getPhotos());
-                        gridView.setAdapter(new PicassoAdapter(context.getApplicationContext(), photos));
+                        gridView.setAdapter(new PicassoAdapter(activity,context.getApplicationContext(), photos));
                     }
 
                     @Override
