@@ -1,14 +1,18 @@
 package comgryszko.szymon.wallpaper.adapters;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,22 +23,31 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
 
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import comgryszko.szymon.wallpaper.R;
+import comgryszko.szymon.wallpaper.utils.PicassoImageDownloader;
 import comgryszko.szymon.wallpaper.utils.SquareImageView;
 import comgryszko.szymon.wallpaper.models.Photo;
 
 public class PicassoAdapter extends BaseAdapter {
 
     private static final String TAG = "PicassoAdapter";
+    private static final int WRITE_EXTERNAL_STORAGE_CODE = 1;
 
     private Context context;
     private LayoutInflater inflater;
@@ -111,38 +124,51 @@ public class PicassoAdapter extends BaseAdapter {
 //                intent.setDataAndType(uri, "image/*");
 //                intent.putExtra("mimeType", "image/*");
 //                activity.startActivity(Intent.createChooser(intent, "Set as:"));
-                Picasso.get().load(photos.get(position).getSrc().getPortrait()).into(new Target(){
+                setAsWallpaper(position);
+                PicassoImageDownloader.imageDownload(URLs.get(position));
+                String path = PicassoImageDownloader.getFileFullPath(URLs.get(position));
+                Log.d(TAG, "onLongClick: " + path);
 
-                    @Override
-                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                        WallpaperManager wallpaperManager = WallpaperManager.getInstance(context);
-                        try {
-                            wallpaperManager.setBitmap(bitmap);
-                        } catch (IOException ex) {
-                            ex.printStackTrace();
-                        }
-                        Log.d("TAG", "onBitmapLoaded: ");
-                        Toast.makeText(context, "Wallpaper Changed", Toast.LENGTH_SHORT).show();
-                    }
-                    @Override
-                    public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-                        Toast.makeText(context, "Loading image failed", Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onPrepareLoad(Drawable placeHolderDrawable) {
-                        Toast.makeText(context, "Downloading image", Toast.LENGTH_SHORT).show();
-                    }
-
-
-                });
                 return true;
+
             }
         });
 
         holder.author.setText(photos.get(position).photographer);
 
         return view;
+    }
+
+
+
+
+
+    private void setAsWallpaper(int position) {
+        Picasso.get().load(photos.get(position).getSrc().getPortrait()).into(new Target(){
+
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                WallpaperManager wallpaperManager = WallpaperManager.getInstance(context);
+                try {
+                    wallpaperManager.setBitmap(bitmap);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                Log.d("TAG", "onBitmapLoaded: ");
+                Toast.makeText(context, "Wallpaper Changed", Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                Toast.makeText(context, "Loading image failed", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+                Toast.makeText(context, "Downloading image", Toast.LENGTH_SHORT).show();
+            }
+
+
+        });
     }
 
     static class ViewHolder {
